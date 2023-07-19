@@ -23,7 +23,7 @@ int	main()
 	sleep(2);
 	pthread_create(&thread_2, NULL, &routine, (void *)s2);
 	usleep(2000000);
-	pthread_create(&thread_3, NULL, &routine, (void *)"Arbesaaaaa");
+	pthread_create(&thread_3, NULL, &routine, (void *)"Williaaaam");
 	pthread_join(thread, NULL);
 	pthread_join(thread_2, NULL);
 	pthread_join(thread_3, NULL);
