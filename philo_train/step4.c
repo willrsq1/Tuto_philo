@@ -23,8 +23,12 @@ void	*routine(void *content)
 		pthread_mutex_unlock(&diner->mutex); // do it with "time ./a.out" to see the diff !
 		i++;
 	}
+	// printf("Number is now = %d.\n", diner->number);
 	return (NULL);
 }
+
+//ùutexes increase time fo execution, thats a future issue that has to be dealts with properly.
+//But the results will always be perfect, because the number will always be changed only by one thread at a time, even if they operate at the same time
 
 int	main()
 {

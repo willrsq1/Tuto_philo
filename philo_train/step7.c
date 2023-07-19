@@ -40,11 +40,16 @@ void	*routine(void *content)
 	printf("ABOUT TO LOCK THE MUTEX : PHILO NUMBER %d\n", philo->id);
 	pthread_mutex_lock(&philo->diner->mutex); //comment these two lines to see the difference
 	printf("Locked by nb %d at time = %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
-	usleep(1500000);
-	pthread_mutex_unlock(&philo->diner->mutex); // times get messed up because of the computer execution when no mutex !
-	printf("UNLOCKED by nb %d at time = %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
+	usleep(5000000);
+	pthread_mutex_unlock(&philo->diner->mutex); //Mutexs will put on "pause" the treads waiting for it!
+	printf("UNLOCKED by nb %d at time = %ldms.\n\n", philo->id, ft_time() - philo->diner->start_time);
 	return (NULL);
 }
+
+//This shows you how extactly mutexes impact your program.
+//Right before they want to lock, it will be printed.
+//When they get to lock the mutex, a message will appear.
+//with and without mutexes, it shows the huge difference in behaviour.
 
 int	main()
 {

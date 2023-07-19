@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-#define NUMBER_OF_PHILOS 2000
+#define NUMBER_OF_PHILOS 500
 
 typedef struct s_philo	t_philo;
 
@@ -41,15 +41,27 @@ void	*routine(void *content)
 	i = 0;
 	while (i < 20)
 	{
-		pthread_mutex_lock(&philo->diner->mutex); //comment these two lines to see the difference
+		// pthread_mutex_lock(&philo->diner->mutex); //comment these two lines to see the difference
 		philo->diner->number += 1;
-		printf("Hey from philosopher %d at time = %ld !\n", philo->id, ft_time() - philo->diner->start_time);
-		usleep(5000);
-		pthread_mutex_unlock(&philo->diner->mutex); // times get messed up because of the computer execution when no mutex !
+		printf("Hey from philosopher %d at time = %ld ms ! number is: % 6d \n", philo->id, ft_time() - philo->diner->start_time, philo->diner->number);
+		// usleep(500);
+		// pthread_mutex_unlock(&philo->diner->mutex); // times get messed up because of the computer execution when no mutex !
 		i++;
 	}
 	return (NULL);
 }
+
+//adding the time thingy !
+//to do it, we get the time at start (ft_time).
+//lets say its 1639XXXX; substracting it to the return of ft_time() later in the program will show the time since the start of the prg (in ms, with this particular version of ft_time).
+//Please try with different numbers of philosophers, and see with/without mutexes/usleep the differences. Play with it until it's understood.
+//notice how the messages get printed in bad orders when the mutexes are commented ? Messages with higher times will be before messages with lower times:
+/* 
+Hey from philosopher 235 at time = 1446 ms ! number is:   9984
+Hey from philosopher 411 at time = 1417 ms ! number is:   9573
+Hey from philosopher 411 at time = 1446 ms ! number is:   9985
+
+*/
 
 int	main()
 {

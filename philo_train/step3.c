@@ -18,6 +18,10 @@ void	*routine(void *content)
 	return (NULL);
 }
 
+//No mutexes : weird numbers because : if two threads do +1 on the value X, both put it to X=1, instead of having X+2 as the final result
+//lets add mutexes then
+//note that with the sleep, no pb: its bc threads will add 1000000 to the values before any other thread adds to it
+
 int	main()
 {
 	pthread_t	threads[10];
@@ -31,7 +35,7 @@ int	main()
 	{
 		pthread_create(&threads[i], NULL, &routine, &number);
 		printf("Thread %d created.\n", i);
-		// usleep(1000000);
+		usleep(1000000);
 		i++;
 	}
 	i = 0;

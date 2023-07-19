@@ -31,13 +31,16 @@ void	*routine(void *content)
 	{
 		pthread_mutex_lock(&philo->diner->mutex); //comment these two lines to see the difference
 		philo->diner->number += 1;
-		printf("Hey from philosopher %d !\n", philo->id);
+		printf("Hey from philosopher %d ! Number is now %d.\n", philo->id, philo->diner->number);
 		usleep(500000);
 		pthread_mutex_unlock(&philo->diner->mutex); // what happens if you comment only one of the lines ?
 		i++;
 	}
 	return (NULL);
 }
+
+//Adding a struct per threads (= a philosopher).
+//we can see which threads (= philosopher) changes the number.
 
 //gcc -Wall -Wextra -Werror -fsanitize=thread ex5.c && ./a.out
 
@@ -56,8 +59,8 @@ int	main()
 	while (i < 10)
 	{
 		diner.philosophers[i] = malloc(sizeof(t_philo));
-		diner.philosophers[i]->id = i;
-		diner.philosophers[i]->diner = &diner;
+		diner.philosophers[i]->id = i; //giving the philos their id
+		diner.philosophers[i]->diner = &diner; //giving the address of the main struct to all philos
 		pthread_create(&diner.threads[i], NULL, &routine, diner.philosophers[i]);
 		// printf("Thread %d created.\n", i);
 		i++;

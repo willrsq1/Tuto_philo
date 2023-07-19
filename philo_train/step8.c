@@ -5,8 +5,8 @@
 #include <sys/time.h>
 
 #define NUMBER_OF_PHILOS 10
-#define TIME_TO_EAT 2000000
-#define TIME_TO_SLEEP 2000000
+#define TIME_TO_EAT 5000000
+#define TIME_TO_SLEEP 5000000
 
 typedef struct s_philo	t_philo;
 
@@ -46,13 +46,17 @@ void	*routine(void *content)
 	pthread_mutex_lock(philo->own_fork);
 	pthread_mutex_lock(philo->left_neighbour_fork);
 	printf("\x1b[32mPhilo %03d is eating: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
-	usleep(TIME_TO_EAT);
+	usleep(TIME_TO_EAT); //random times defined at the top of the file (in micro sec);
 	pthread_mutex_unlock(philo->own_fork);
 	pthread_mutex_unlock(philo->left_neighbour_fork);
 	printf("\x1b[96mPhilo %03d is sleeping: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
 	usleep(TIME_TO_SLEEP);
 	return (NULL);
 }
+
+//introducing "forks": They are mutexes, one per each philosopher. Philosophers share ONE fork with ONE neighbour.
+//to "eat", they need to have two forks -- = they need to lock two mutexes, their own, and their neighbour's.
+//Half will eat, half will be waiting in a lock. Does it makes sence ? Try commenting lines to see the inside of the program more clearly.
 
 int	main()
 {
