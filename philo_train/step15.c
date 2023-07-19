@@ -79,7 +79,6 @@ void	ft_usleep(t_philo *philo, time_t time)
 
 void	ft_writing(t_philo *philo, int message)
 {
-	pthread_mutex_lock(&philo->diner->death_lock);
 	pthread_mutex_lock(&philo->diner->writing_lock);
 	if (philo->diner->kill_all_philos == NO) //checking the death lock will change everything ! no message will be written after someone died.
 	{
@@ -93,7 +92,6 @@ void	ft_writing(t_philo *philo, int message)
 			printf("Philo % 3d is \x1b[31mis done eating\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
 	}
 	pthread_mutex_unlock(&philo->diner->writing_lock);
-	pthread_mutex_unlock(&philo->diner->death_lock);
 }
 
 void	ft_forks(t_philo *philo, int action)
@@ -127,10 +125,12 @@ int	ft_death_function(t_philo *philo)
 	if (philo->time_of_meal + philo->diner->time_to_die <= ft_time())
 	{
 		pthread_mutex_lock(&philo->diner->death_lock);
+		pthread_mutex_lock(&philo->diner->writing_lock);
 		if (philo->diner->kill_all_philos == NO)
 			printf("Philo % 3d is \x1b[31mDEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
 			//we don't use ft_writing, because ft_writing uses the same locks. It would block (you can try to see !)
 		philo->diner->kill_all_philos = YES;
+		pthread_mutex_unlock(&philo->diner->writing_lock);
 		pthread_mutex_unlock(&philo->diner->death_lock);
 		return (SOMEBODY_DIED);
 	}
@@ -142,12 +142,12 @@ void	*routine(void *content)
 	t_philo	*philo;
 
 	philo = (t_philo *)content;
+	philo->time_of_meal = philo->diner->start_time + 1000;
 	while (ft_time() < philo->diner->start_time) //makes them wait to start at the same time
-		usleep(100);
-	philo->time_of_meal = ft_time();
+		usleep(1000);
 	if (philo->id % 2 == 1)
 	{// THIS IS NECESSARY TO AVOID PHILOS BEEING STUCK WAITING FOR A LOCK TO UNLOCK, AND AVOIDING DEATH THAT WAY
-		// ft_writing(philo, THINKING);
+		ft_writing(philo, THINKING);
 		ft_usleep(philo, philo->diner->time_to_eat / 2);
 	}
 	while (1)

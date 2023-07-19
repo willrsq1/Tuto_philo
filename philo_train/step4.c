@@ -23,7 +23,7 @@ void	*routine(void *content)
 		pthread_mutex_unlock(&diner->mutex); // do it with "time ./a.out" to see the diff !
 		i++;
 	}
-	// printf("Number is now = %d.\n", diner->number);
+	//if you put the mutexes outside of the while, it will be wayyy faster. But they will execute one after the other, not simultaneously. That's not what we want!
 	return (NULL);
 }
 
