@@ -8,7 +8,7 @@
 #define TIME_TO_EAT 200
 #define TIME_TO_SLEEP 200
 #define TIME_TO_THINK 10
-#define TIME_BEFORE_DEATH 800
+#define TIME_BEFORE_DEATH 400
 #define EATING 1
 #define SLEEPING 2
 #define THINKING 3
@@ -53,6 +53,7 @@ typedef struct s_philo
 }	t_philo;
 
 int	ft_death_function(t_philo *philo);
+int	ft_is_anyone_dead(t_philo *philo);
 
 void	ft_usleep(t_philo *philo, time_t time)
 {
@@ -74,12 +75,12 @@ void	ft_writing(t_philo *philo, int message)
 	pthread_mutex_lock(&philo->diner->writing_lock);
 	if (message == EATING)
 		printf("Philo % 3d is \x1b[32meating\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
-	if (message == SLEEPING)
+	else if (message == SLEEPING)
 		printf("Philo % 3d is \x1b[96msleeping\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
-	if (message == THINKING)
+	else if (message == THINKING)
 		printf("Philo % 3d is \x1b[31mthinking\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
-	if (message == DEAD)
-		printf("Philo % 3d is \x1b[31mDEAD\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
+	else if (message == DEAD)
+		printf("Philo % 3d is \x1b[31mDEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
 	pthread_mutex_unlock(&philo->diner->writing_lock);
 }
 
@@ -97,17 +98,12 @@ void	ft_forks(t_philo *philo, int action)
 	}
 }
 
-int	ft_is_anyone_dead(t_philo *philo)
-{
-	pthread_mutex_lock(&philo->diner->death_lock);
-	if (philo->diner->kill_all_philos == YES)
-	{
-		pthread_mutex_unlock(&philo->diner->death_lock);
-		return (SOMEBODY_DIED);
-	}
-	pthread_mutex_unlock(&philo->diner->death_lock);
-	return (NO_ONE_HAS_DIED);
-}
+
+//The death function : How does it work ?
+//When a philo hasn't eaten in a certain time, the first if will proc.
+//The "ft_is_anyone_dead" will check for the "kill_all_philos" variable's value.
+//If the if mentionned above has been proced by a thread, the value will be set to YES and we will now a philo has died.
+//The death function is only used in ft_usleep for now. But it will now stop when a philo dies: not only when time >10sec.
 
 int	ft_death_function(t_philo *philo)
 {
@@ -122,6 +118,20 @@ int	ft_death_function(t_philo *philo)
 	}
 	return (ft_is_anyone_dead(philo));
 }
+
+int	ft_is_anyone_dead(t_philo *philo)
+{
+	pthread_mutex_lock(&philo->diner->death_lock);
+	if (philo->diner->kill_all_philos == YES)
+	{
+		pthread_mutex_unlock(&philo->diner->death_lock);
+		return (SOMEBODY_DIED);
+	}
+	pthread_mutex_unlock(&philo->diner->death_lock);
+	return (NO_ONE_HAS_DIED);
+}
+
+
 
 void	*routine(void *content)
 {
@@ -143,7 +153,6 @@ void	*routine(void *content)
 		ft_usleep(philo, TIME_TO_THINK);//	CYCLE
 		if (ft_time() - philo->diner->start_time > 10000)
 			return (NULL); //we still kill it a 10sec
-			
 		if (ft_death_function(philo) == SOMEBODY_DIED)
 			return (NULL);
 	}
@@ -153,7 +162,7 @@ void	*routine(void *content)
 //NICE ! BUT WHAT HAPPENS WHEN ONE DIES ?
 // Other messages still get printed. That's bad. To fix it, how can we do ? Where can we put a mutex_lock?
 // yes ! in the printing function
-// also, let's add the "meals needed" variable. In ordr to stop after a philo eats X times.
+// also, let's add the "meals needed" variable. In order to stop after a philo eats X times.
 
 int	main()
 {

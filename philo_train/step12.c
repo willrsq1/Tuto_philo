@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-#define NUMBER_OF_PHILOS 4
+#define NUMBER_OF_PHILOS 11
 #define TIME_TO_EAT 1000
 #define TIME_TO_SLEEP 500
 #define TIME_TO_THINK 10
@@ -61,7 +61,7 @@ void	ft_usleep(t_philo *philo, time_t time)
 
 void	ft_writing(t_philo *philo, int message)
 {
-	pthread_mutex_lock(&philo->diner->writing_lock);
+	pthread_mutex_lock(&philo->diner->writing_lock); //locks the mutex before writing
 	if (message == EATING)
 		printf("Philo % 3d is \x1b[32meating\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
 	if (message == SLEEPING)
@@ -73,12 +73,12 @@ void	ft_writing(t_philo *philo, int message)
 
 void	ft_forks(t_philo *philo, int action)
 {
-	if (action == LOCK)
+	if (action == LOCK) //locks the forks
 	{
 		pthread_mutex_lock(philo->own_fork);
 		pthread_mutex_lock(philo->left_neighbour_fork);
 	}
-	if (action == UNLOCK)
+	if (action == UNLOCK) //unlocks the forks
 	{
 		pthread_mutex_unlock(philo->own_fork);
 		pthread_mutex_unlock(philo->left_neighbour_fork);
@@ -102,7 +102,7 @@ void	*routine(void *content)
 
 		ft_writing(philo, SLEEPING);//		SLEEPING
 		ft_usleep(philo, TIME_TO_SLEEP);//	CYCLE
-		ft_writing(philo, THINKING); // nothing
+		ft_writing(philo, THINKING); // thinking
 		ft_usleep(philo, TIME_TO_THINK);//	CYCLE
 		if (ft_time() - philo->diner->start_time > 10000)
 			return (NULL);
@@ -110,6 +110,7 @@ void	*routine(void *content)
 	return (NULL);
 }
 
+//cleaned !
 //PRETTY GOOD, BUT STILL, THEY DIE AT 10sec, NOT WHEN THEY STARVE. LETS MAKE THE DEATH FUNCTION NEXT!
 
 int	main()

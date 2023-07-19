@@ -52,11 +52,13 @@ void	*routine(void *content)
 		pthread_mutex_unlock(philo->left_neighbour_fork);
 		printf("Philo %03d is \x1b[96msleeping\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
 		usleep(TIME_TO_SLEEP);
-		printf("Philo %03d is \x1b[31mthinking\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
+		// printf("Philo %03d is \x1b[31mthinking\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
 		i++;
 	}
 	return (NULL);
 }
+
+//now with a loooooooop
 
 int	main()
 {

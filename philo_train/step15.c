@@ -85,11 +85,11 @@ void	ft_writing(t_philo *philo, int message)
 	{
 		if (message == EATING)
 			printf("Philo % 3d is \x1b[32meating\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
-		if (message == SLEEPING)
+		else if (message == SLEEPING)
 			printf("Philo % 3d is \x1b[96msleeping\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
-		if (message == THINKING)
+		else if (message == THINKING)
 			printf("Philo % 3d is \x1b[31mthinking\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
-		if (message == DONE_EATING)
+		else if (message == DONE_EATING)
 			printf("Philo % 3d is \x1b[31mis done eating\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
 	}
 	pthread_mutex_unlock(&philo->diner->writing_lock);
@@ -147,7 +147,7 @@ void	*routine(void *content)
 	philo->time_of_meal = ft_time();
 	if (philo->id % 2 == 1)
 	{// THIS IS NECESSARY TO AVOID PHILOS BEEING STUCK WAITING FOR A LOCK TO UNLOCK, AND AVOIDING DEATH THAT WAY
-		ft_writing(philo, THINKING);
+		// ft_writing(philo, THINKING);
 		ft_usleep(philo, philo->diner->time_to_eat / 2);
 	}
 	while (1)

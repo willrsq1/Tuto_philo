@@ -5,10 +5,10 @@
 #include <sys/time.h>
 
 #define NUMBER_OF_PHILOS 55
-#define TIME_TO_EAT 200
-#define TIME_TO_SLEEP 100
+#define TIME_TO_EAT 300
+#define TIME_TO_SLEEP 300
 #define TIME_TO_THINK 10
-#define TIME_BEFORE_DEATH 230
+#define TIME_BEFORE_DEATH 800
 #define NUMBER_OF_MEALS_NEEDED 5
 #define EATING 1
 #define SLEEPING 2
@@ -156,7 +156,7 @@ void	*routine(void *content)
 		if (philo->meals_needed == NUMBER_OF_MEALS_NEEDED)
 			break ;
 		ft_writing(philo, THINKING);
-		if (NUMBER_OF_PHILOS % 2 == 1) //EXTREMELY IMPORTANT FOR WHEN THERE ARE AN ODD NUMBER OF PHILOS
+		if (NUMBER_OF_PHILOS % 2 == 1) //EXTREMELY IMPORTANT FOR WHEN THERE ARE AN ODD NUMBER OF PHILOS - in certain cases.
 			ft_usleep(philo, TIME_TO_EAT);//	CYCLE
 		if (ft_death_function(philo) == SOMEBODY_DIED)
 			return (NULL);
@@ -166,7 +166,8 @@ void	*routine(void *content)
 }
 
 //Working. Try with absurd numbers of philos (4444 ?) to check that when one dies, nothing is written after.
-
+//thats clener.
+//some other changes than death var, you don't have to use them for now, but they will prove usefull during correction
 //NOT INSTEAD OF DEFINES, LETS TRY TO GET THE VALUES FROM INPUT !
 
 int	main()

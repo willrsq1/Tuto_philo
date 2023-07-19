@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-#define NUMBER_OF_PHILOS 10
+#define NUMBER_OF_PHILOS 4
 #define TIME_TO_EAT 5000000
 #define TIME_TO_SLEEP 5000000
 
@@ -57,6 +57,7 @@ void	*routine(void *content)
 //introducing "forks": They are mutexes, one per each philosopher. Philosophers share ONE fork with ONE neighbour.
 //to "eat", they need to have two forks -- = they need to lock two mutexes, their own, and their neighbour's.
 //Half will eat, half will be waiting in a lock. Does it makes sence ? Try commenting lines to see the inside of the program more clearly.
+//Because of the double lock, all philos cannot eat at the same time. Will some starve ?? lol
 
 int	main()
 {
