@@ -40,9 +40,7 @@ void	*routine(void *content)
 	t_philo	*philo;
 
 	philo = (t_philo *)content;
-	int	i;
-	i = 0;
-	while (i < 10)
+	while (1)
 	{
 		pthread_mutex_lock(philo->own_fork);
 		pthread_mutex_lock(philo->left_neighbour_fork);
@@ -52,13 +50,28 @@ void	*routine(void *content)
 		pthread_mutex_unlock(philo->left_neighbour_fork);
 		printf("Philo %03d is \x1b[96msleeping\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
 		usleep(TIME_TO_SLEEP);
-		// printf("Philo %03d is \x1b[31mthinking\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
-		i++;
+		printf("Philo %03d is \x1b[31mthinking\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
+		if (ft_time() > philo->diner->start_time + 5000) //kill at 10sec - except it doesnt work ! because some are sleeping or eating at 10...
+		{
+			printf("Philo %d is finished eating at time %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
+			return (NULL); //also, printfs get messed up..
+		}
 	}
 	return (NULL);
 }
 
-//now with a loooooooop
+//trying to implemant killing philos when a certain condition is reached.
+//here: when 10 secs elapsed.
+//its not working at all: if a philo is in a usleep when time = 10sec, it won't die until it reachs the if. Thats an issue!
+//lets fix it.
+//Another issue has came up: printfs ! they can get mixed, some printed before/after others, higher times getting printed before lowers..
+//to fix it: add a mutex around the prints !
+/*
+Example of bad print: (with 600 philos)
+Philo 547 is eating: 6105ms.
+Philo 537 is eating: 6103ms.
+Philo 531 is eating: 6105ms.
+*/
 
 int	main()
 {

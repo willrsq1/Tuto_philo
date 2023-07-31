@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-#define NUMBER_OF_PHILOS 60
-#define TIME_TO_EAT 1000
-#define TIME_TO_SLEEP 1000
+#define NUMBER_OF_PHILOS 6
+#define TIME_TO_EAT 2000
+#define TIME_TO_SLEEP 2000
 
 typedef struct s_philo	t_philo;
 
@@ -45,7 +45,7 @@ void	ft_usleep(t_philo *philo, time_t time)
 	{
 		if (ft_time() > starting_time + time) // IT will return when the usleep inputed time has passed.
 			return ;
-		if (ft_time() - philo->diner->start_time > 10000) //it will also return if time>10sec.
+		if (ft_time() > philo->diner->start_time + 10000) //it will also return if time>10sec.
 			return ;
 		usleep(1000);
 	}
@@ -63,19 +63,32 @@ void	*routine(void *content)
 	{
 		pthread_mutex_lock(philo->own_fork);
 		pthread_mutex_lock(philo->left_neighbour_fork);
+
+
 		pthread_mutex_lock(&philo->diner->writing_lock); //FIX THE PRINTF
 		printf("Philo %03d is \x1b[32meating\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
 		pthread_mutex_unlock(&philo->diner->writing_lock);//FIX THE PRINTF
+
+
+
 		ft_usleep(philo, TIME_TO_EAT);
+
 		pthread_mutex_unlock(philo->own_fork);
 		pthread_mutex_unlock(philo->left_neighbour_fork);
+
+
 		pthread_mutex_lock(&philo->diner->writing_lock);//FIX THE PRINTF
 		printf("Philo %03d is \x1b[96msleeping\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
 		pthread_mutex_unlock(&philo->diner->writing_lock);//FIX THE PRINTF
+
+
 		ft_usleep(philo, TIME_TO_SLEEP);
+
 		pthread_mutex_lock(&philo->diner->writing_lock);//FIX THE PRINTF
 		printf("Philo %03d is \x1b[31mthinking\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
 		pthread_mutex_unlock(&philo->diner->writing_lock);//FIX THE PRINTF
+
+		
 		if (ft_time() - philo->diner->start_time > 10000)
 		{
 			//because usleep will not activate when time>10sec, the philos should all stop at the right time now.

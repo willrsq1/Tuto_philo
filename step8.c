@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-#define NUMBER_OF_PHILOS 4
+#define NUMBER_OF_PHILOS 200
 #define TIME_TO_EAT 5000000
 #define TIME_TO_SLEEP 5000000
 

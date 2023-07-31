@@ -9,7 +9,7 @@ void	*routine(void *content)
 	number = (int *)content;
 	*number += 1;
 	usleep(10000);
-	printf("Number is now = %d.\n", *number);
+	printf("Number is now = %d.\n\n", *number);
 	return (NULL);
 }
 
@@ -22,7 +22,7 @@ int	main()
 	i = 0;
 	number = 0;
 	printf("At initializaiton, number = %d.\n", number);
-	while (i < 10)
+	while (i < 5)
 	{
 		pthread_create(&threads[i], NULL, &routine, &number);
 		printf("Thread %d created.\n", i);
@@ -30,7 +30,7 @@ int	main()
 		i++;
 	}
 	i = 0;
-	while (i < 10)
+	while (i < 5)
 	{
 		pthread_join(threads[i], NULL);
 		printf("Thread %d destroyed.\n", i);

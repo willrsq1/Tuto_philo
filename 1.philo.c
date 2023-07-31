@@ -4,12 +4,6 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-// #define NUMBER_OF_PHILOS 55
-// #define TIME_TO_EAT 200
-// #define TIME_TO_SLEEP 100
-// #define TIME_TO_THINK 10
-// #define TIME_BEFORE_DEATH 230
-// #define NUMBER_OF_MEALS_NEEDED 5
 #define EATING 1
 #define SLEEPING 2
 #define THINKING 3
@@ -35,7 +29,7 @@ time_t	ft_time(void)
 
 typedef struct s_diner
 {
-	pthread_mutex_t	*forks;
+	pthread_mutex_t	forks[200];
 	pthread_mutex_t	writing_lock;
 	pthread_mutex_t	death_lock;
 	int				kill_all_philos;
@@ -45,8 +39,8 @@ typedef struct s_diner
 	int				time_to_die;
 	int				number_of_meals_needed;
 	int				number_of_philos;
-	pthread_t		*threads;
-	t_philo			**philosophers;
+	pthread_t		threads[200];
+	t_philo			*philosophers[200];
 	time_t			start_time;
 }	t_diner;
 
@@ -66,31 +60,24 @@ void	ft_usleep(t_philo *philo, time_t time)
 {
 	time_t	starting_time;
 
+	if (ft_death_function(philo) == SOMEBODY_DIED)
+		return ;
 	starting_time = ft_time();
-	while (1)
+	while (ft_time() < starting_time + time)
 	{
-		if (ft_time() > starting_time + time)
-			return ;
 		if (ft_death_function(philo) == SOMEBODY_DIED)
 			return ;
 		usleep(100);
+		if (ft_death_function(philo) == SOMEBODY_DIED)
+			return ;
 	}
 }
 
-void	ft_writing(t_philo *philo, int message)
+void	ft_writing(t_philo *philo, char *message)
 {
 	pthread_mutex_lock(&philo->diner->writing_lock);
-	if (philo->diner->kill_all_philos == NO) //checking the death lock will change everything ! no message will be written after someone died.
-	{
-		if (message == EATING)
-			printf("Philo % 3d is \x1b[32meating\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
-		else if (message == SLEEPING)
-			printf("Philo % 3d is \x1b[96msleeping\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
-		else if (message == THINKING)
-			printf("Philo % 3d is \x1b[31mthinking\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
-		else if (message == DONE_EATING)
-			printf("Philo % 3d is \x1b[31mis done eating\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
-	}
+	if (philo->diner->kill_all_philos == NO)
+		printf("% 10ld %d %s.\n", ft_time() - philo->diner->start_time, philo->id, message);
 	pthread_mutex_unlock(&philo->diner->writing_lock);
 }
 
@@ -98,8 +85,12 @@ void	ft_forks(t_philo *philo, int action)
 {
 	if (action == LOCK)
 	{
+		if (ft_death_function(philo) == SOMEBODY_DIED)
+			return ;
 		pthread_mutex_lock(philo->own_fork);
+		ft_writing(philo, "has taken a fork");
 		pthread_mutex_lock(philo->left_neighbour_fork);
+		ft_writing(philo, "has taken a fork");
 	}
 	if (action == UNLOCK)
 	{
@@ -127,8 +118,7 @@ int	ft_death_function(t_philo *philo)
 		pthread_mutex_lock(&philo->diner->death_lock);
 		pthread_mutex_lock(&philo->diner->writing_lock);
 		if (philo->diner->kill_all_philos == NO)
-			printf("Philo % 3d is \x1b[31mDEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD\x1b[0m: %ldms.\n", philo->id, ft_time() - philo->diner->start_time);
-			//we don't use ft_writing, because ft_writing uses the same locks. It would block (you can try to see !)
+			printf("% 10ld %d died\n", ft_time() - philo->diner->start_time, philo->id);
 		philo->diner->kill_all_philos = YES;
 		pthread_mutex_unlock(&philo->diner->writing_lock);
 		pthread_mutex_unlock(&philo->diner->death_lock);
@@ -143,44 +133,56 @@ void	*routine(void *content)
 
 	philo = (t_philo *)content;
 	philo->time_of_meal = philo->diner->start_time + 1000;
-	while (ft_time() < philo->diner->start_time) //makes them wait to start at the same time
-		usleep(1000);
+	usleep((philo->diner->start_time - ft_time()) * 0.8);
+	while (ft_time() < philo->diner->start_time)
+		usleep(100);
 	if (philo->id % 2 == 1)
-	{// THIS IS NECESSARY TO AVOID PHILOS BEEING STUCK WAITING FOR A LOCK TO UNLOCK, AND AVOIDING DEATH THAT WAY
-		ft_writing(philo, THINKING);
+	{
+		ft_writing(philo, "is thinking");
 		ft_usleep(philo, philo->diner->time_to_eat / 2);
 	}
-	while (1)
+	while (philo->meals_needed != philo->diner->number_of_meals_needed)
 	{
-		ft_forks(philo, LOCK);//		THIS
+		ft_forks(philo, LOCK);
 		if (ft_death_function(philo) == SOMEBODY_DIED)
-			return (ft_forks(philo, UNLOCK), NULL);				//CHECK FOR DEATH AFTER UNLOCKING THE FORKS
+			return (ft_forks(philo, UNLOCK), NULL);
 		philo->time_of_meal = ft_time();
 		philo->meals_needed += 1;
-		ft_writing(philo, EATING);//	IS
-		ft_usleep(philo, philo->diner->time_to_eat);//EATING
-		ft_forks(philo, UNLOCK);//		CYCLE
-	
-
-		ft_writing(philo, SLEEPING);//		SLEEPING
-		ft_usleep(philo, philo->diner->time_to_sleep);//	CYCLE
-		if (philo->meals_needed == philo->diner->number_of_meals_needed)
-			break ;
-		ft_writing(philo, THINKING);
-		if (philo->diner->number_of_philos % 2 == 1) //EXTREMELY IMPORTANT FOR WHEN THERE ARE AN ODD NUMBER OF PHILOS
-			ft_usleep(philo, philo->diner->time_to_eat);//	CYCLE
+		ft_writing(philo, "is eating");
+		ft_usleep(philo, philo->diner->time_to_eat);
+		ft_forks(philo, UNLOCK);
+		ft_writing(philo, "is sleeping");
+		ft_usleep(philo, philo->diner->time_to_sleep);
+		ft_writing(philo, "is thinking");
+		ft_usleep(philo, philo->diner->time_to_think);
 		if (ft_death_function(philo) == SOMEBODY_DIED)
 			return (NULL);
 	}
-	ft_writing(philo, DONE_EATING);
 	return (NULL);
 }
 
-/*	1) Put the defines inside the main struct
-	2) Replace all defines by the struct's var
+/* Functionnal philo. Add error management before completing.*/
 
-	gotta do error handling
-	*/
+time_t ft_time_to_think(t_diner *diner)
+{
+	time_t	time;
+
+	if (diner->number_of_philos % 2 == 0)
+	{
+		time = diner->time_to_eat - diner->time_to_sleep - 5;
+		if (time < 0)
+			return (0);
+		return (time);
+	}
+	else
+	{
+		time = diner->time_to_eat * 2 - diner->time_to_sleep - 5;
+		if (time < 0)
+			time = 0;
+		return (time);
+	}
+	return (0);
+}
 
 int	main(int argc, char **argv)
 {
@@ -192,18 +194,16 @@ int	main(int argc, char **argv)
 	if (!(argc == 5 || argc == 6)) //check for the inputs
 		return (write(2, "Bad args\n", 9), 1);
 	diner.number_of_philos = atoi(argv[1]);
+	if (diner.number_of_philos > 200 || diner.number_of_philos < 2)
+		return (write(2, "Too many philos\n", 16), 1);
 	diner.time_to_die = atoi(argv[2]); //get all the inputs
 	diner.time_to_eat = atoi(argv[3]);
 	diner.time_to_sleep = atoi(argv[4]);
+	diner.time_to_think = ft_time_to_think(&diner);
 	diner.number_of_meals_needed = -1;
 	if (argc == 6)
 		diner.number_of_meals_needed = atoi(argv[5]);
-	//malloc the data with the right size
-	diner.threads = malloc(sizeof(pthread_t) * diner.number_of_philos);
-	diner.forks = malloc(sizeof(pthread_mutex_t) * diner.number_of_philos);
-
-	//good !
-	while (i < diner.number_of_philos) //mutex creation, 1/philo
+	while (i < diner.number_of_philos)
 	{
 		pthread_mutex_init(&diner.forks[i], NULL);
 		i++;
@@ -212,27 +212,25 @@ int	main(int argc, char **argv)
 	pthread_mutex_init(&diner.writing_lock, NULL);
 	pthread_mutex_init(&diner.death_lock, NULL);
 	diner.kill_all_philos = NO;
-	diner.philosophers = malloc(sizeof(t_philo *) * diner.number_of_philos);
 	diner.start_time = ft_time() + 1000;
 	printf("Starting time : %ld.\n", ft_time() - diner.start_time + 1000);
 	while (i < diner.number_of_philos)
 	{
 		diner.philosophers[i] = malloc(sizeof(t_philo));
-		diner.philosophers[i]->id = i;
+		diner.philosophers[i]->id = i + 1;
 		diner.philosophers[i]->meals_needed = 0;
 		diner.philosophers[i]->diner = &diner;
-		diner.philosophers[i]->own_fork = &diner.forks[i]; //giving them two forks
-		diner.philosophers[i]->left_neighbour_fork = &diner.forks[(i + 1) % diner.number_of_philos]; // philo 0: forks 1 and 2. philo nb MAX: forks max and 0.
+		diner.philosophers[i]->own_fork = &diner.forks[i];
+		diner.philosophers[i]->left_neighbour_fork = &diner.forks[(i + 1) % diner.number_of_philos];
 		pthread_create(&diner.threads[i], NULL, &routine, diner.philosophers[i]);
 		i++;
 	}
 	i = 0;
 	while (i < diner.number_of_philos)
 	{
-		pthread_join(diner.threads[i], NULL); //join the threads BEFORE destroying the mutexes
+		pthread_join(diner.threads[i], NULL);
 		i++;
 	}
-	free(diner.threads);
 	i = 0;
 	while (i < diner.number_of_philos)
 	{
@@ -240,8 +238,6 @@ int	main(int argc, char **argv)
 		free(diner.philosophers[i]);
 		i++;
 	}
-	free(diner.philosophers);
-	free(diner.forks);
 	pthread_mutex_destroy(&diner.writing_lock);
 	pthread_mutex_destroy(&diner.death_lock);
 }

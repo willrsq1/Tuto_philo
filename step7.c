@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-#define NUMBER_OF_PHILOS 10
+#define NUMBER_OF_PHILOS 12
 
 typedef struct s_philo	t_philo;
 

@@ -39,13 +39,13 @@ void	*routine(void *content)
 
 	philo = (t_philo *)content;
 	i = 0;
-	while (i < 20)
+	while (i < 30)
 	{
-		// pthread_mutex_lock(&philo->diner->mutex); //comment these two lines to see the difference
+		pthread_mutex_lock(&philo->diner->mutex); //comment these two lines to see the difference
 		philo->diner->number += 1;
+		pthread_mutex_unlock(&philo->diner->mutex); // times get messed up because of the computer execution when no mutex !
 		printf("Hey from philosopher %d at time = %ld ms ! number is: % 6d \n", philo->id, ft_time() - philo->diner->start_time, philo->diner->number);
-		// usleep(500);
-		// pthread_mutex_unlock(&philo->diner->mutex); // times get messed up because of the computer execution when no mutex !
+		// usleep(1000000);
 		i++;
 	}
 	return (NULL);

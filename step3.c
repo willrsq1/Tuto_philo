@@ -35,7 +35,7 @@ int	main()
 	{
 		pthread_create(&threads[i], NULL, &routine, &number);
 		printf("Thread %d created.\n", i);
-		usleep(1000000);
+		// usleep(1000000);
 		i++;
 	}
 	i = 0;
